@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Product AI Scanner</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;background:#f5f7fa;color:#17202a}
+header{background:#111827;color:white;padding:22px 18px}
+header h1{margin:0;font-size:24px} header p{margin:6px 0 0;color:#cbd5e1}
+main{max-width:900px;margin:auto;padding:18px}
+.card{background:white;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 3px 14px #00000012}
+button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer}
+.primary{background:#2563eb;color:white}.secondary{background:#e5e7eb}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+input,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #d1d5db;border-radius:9px;font:inherit}
+textarea{min-height:130px}
+#preview{max-width:100%;max-height:300px;border-radius:12px;margin-top:12px;display:none}
+.status{padding:10px;border-radius:9px;background:#eff6ff;color:#1e40af;margin-top:12px}
+.small{font-size:12px;color:#64748b}
+</style>
+</head>
+<body>
+<header><h1>📦 Product AI Scanner</h1><p>Scan products and prepare eBay-ready listings</p></header>
+<main>
+<div class="card">
+<h2>1. Product photo</h2>
+<input id="photo" type="file" accept="image/*" capture="environment">
+<img id="preview">
+<div style="margin-top:12px">
+<button class="primary" onclick="scanDemo()">🔎 Analyse product</button>
+</div>
+<div id="status"></div>
+</div>
+
+<div class="card">
+<h2>2. Product information</h2>
+<div class="grid">
+<div><label>Brand</label><input id="brand" placeholder="Detected brand"></div>
+<div><label>Product / model</label><input id="product" placeholder="Detected product"></div>
+<div><label>MPN</label><input id="mpn" placeholder="Verified MPN"></div>
+<div><label>EAN / GTIN</label><input id="ean" placeholder="Verified EAN"></div>
+<div><label>Cost price (£)</label><input id="cost" type="number" step=".01" placeholder="0.00"></div>
+<div><label>Suggested price (£)</label><input id="price" type="number" step=".01" placeholder="0.00"></div>
+</div>
+</div>
+
+<div class="card">
+<h2>3. eBay listing</h2>
+<label>SEO title</label>
+<input id="title" maxlength="80" placeholder="Your eBay title">
+<p class="small"><span id="count">0</span>/80 characters</p>
+<label>Description</label>
+<textarea id="description" placeholder="eBay description"></textarea>
+<div style="margin-top:12px">
+<button class="primary" onclick="copyListing()">📋 Copy listing</button>
+<button class="secondary" onclick="saveDraft()">💾 Save draft</button>
+</div>
+</div>
+
+<div class="card">
+<h2>4. Profit estimate</h2>
+<div id="profit">Enter cost and price above.</div>
+<p class="small">This demo does not claim live eBay fees, live product identification, or live marketplace data. Those require the connected AI/eBay services in the production version.</p>
+</div>
+</main>
+
+<script>
+const photo=document.getElementById('photo'), preview=document.getElementById('preview');
+photo.onchange=()=>{const f=photo.files[0];if(f){preview.src=URL.createObjectURL(f);preview.style.display='block'}};
+document.getElementById('title').oninput=e=>document.getElementById('count').textContent=e.target.value.length;
+function scanDemo(){
+ const s=document.getElementById('status'); s.className='status'; s.textContent='Demo scanner ready. Connect the AI/product-search backend to perform live identification.';
+}
+function copyListing(){
+ const t=document.getElementById('title').value, d=document.getElementById('description').value;
+ navigator.clipboard?.writeText(t+'\n\n'+d); alert('Listing copied.');
+}
+function saveDraft(){
+ const data={brand:brand.value,product:product.value,mpn:mpn.value,ean:ean.value,cost:cost.value,price:price.value,title:title.value,description:description.value};
+ localStorage.setItem('productDraft',JSON.stringify(data)); alert('Draft saved on this device.');
+}
+function calc(){
+ const c=parseFloat(cost.value),p=parseFloat(price.value);
+ profit.innerHTML=Number.isFinite(c)&&Number.isFinite(p)?`<strong>Gross difference: £${(p-c).toFixed(2)}</strong><br>Actual eBay fees, postage and VAT should be added before using this as a final profit figure.`:'Enter cost and price above.';
+}
+['cost','price'].forEach(id=>document.getElementById(id).oninput=calc);
+</script>
+</body>
+</html>
