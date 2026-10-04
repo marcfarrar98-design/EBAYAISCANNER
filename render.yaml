@@ -20,5 +20,5 @@ services:
         value: production
       - key: EBAY_MARKETPLACE_ID
         value: EBAY_GB
-      - key: APP_BASE_URL
-        sync: false
+      - key: PORT
+        value: "10000"
